@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
+    "start:prod": "next start --hostname 0.0.0.0",
     "lint": "eslint . --ext .ts,.tsx",
     "migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
