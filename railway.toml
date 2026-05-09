@@ -11,6 +11,3 @@ restartPolicyMaxRetries = 3
 
 [networks]
 private = true
-
-[networks]
-private = true
