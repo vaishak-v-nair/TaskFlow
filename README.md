@@ -364,7 +364,9 @@ NODE_ENV=production
 The `railway.toml` file handles this automatically:
 - **Build**: `npm ci && npx prisma generate && npm run build`
 - **Start**: `npx prisma migrate deploy && npm start`
-- **Health Check**: `GET /api/auth/me` (every 30 seconds)
+- **Health Check**: `GET /api/health` (every 30 seconds)
+
+> Note: `/api/auth/me` is authentication-protected and will fail Railway health checks for unauthenticated probes.
 
 #### Step 6: Deploy
 Push a new commit to trigger deployment:

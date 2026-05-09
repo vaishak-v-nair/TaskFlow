@@ -4,7 +4,7 @@ buildCommand = "npm ci --ignore-scripts --no-fund --no-audit && npx prisma gener
 
 [deploy]
 startCommand = "npm run migrate && npm start"
-healthcheckPath = "/api/auth/me"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
