@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "rm -rf node_modules/.cache && npm ci --ignore-scripts && npx prisma generate && npm run build"
+buildCommand = "npm ci --ignore-scripts && npx prisma generate && npm run build"
 
 [deploy]
 startCommand = "npm run migrate && npm start"
