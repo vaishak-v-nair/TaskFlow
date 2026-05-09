@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "rm -rf node_modules && npm ci && npm run build"
+buildCommand = "npm ci --cache /tmp/.npm --prefer-offline --no-audit && npm run build"
 
 [deploy]
 startCommand = "npm run migrate && npm start"
