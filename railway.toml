@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm cache clean --force && npm ci && npm run build"
+buildCommand = "rm -rf node_modules && npm ci && npm run build"
 
 [deploy]
 startCommand = "npm run migrate && npm start"
@@ -13,4 +13,4 @@ restartPolicyMaxRetries = 3
 private = true
 
 [build.env]
-NODE_VERSION = "20"
+NODE_VERSION = "20.19"
