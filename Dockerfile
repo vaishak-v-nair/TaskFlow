@@ -6,8 +6,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install dependencies using npm install (not npm ci)
-# npm install does NOT aggressively delete node_modules, so it won't conflict with Docker cache mounts
-RUN npm install --omit=dev --no-fund --no-audit
+# We need devDependencies for Tailwind/PostCSS during build.
+RUN npm install --no-fund --no-audit
 
 # Copy prisma schema
 COPY prisma ./prisma
