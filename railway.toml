@@ -1,13 +1,16 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm run build"
+buildCommand = "npm ci && npm run build"
 
 [deploy]
-startCommand = "npx prisma migrate deploy && npm start"
+startCommand = "npm run migrate && npm start"
 healthcheckPath = "/api/auth/me"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
+
+[networks]
+private = true
 
 [networks]
 private = true
