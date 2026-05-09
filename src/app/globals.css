@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --accent: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-zinc-900 border border-zinc-800 rounded-xl;
+  }
+
+  .btn-primary {
+    @apply bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-zinc-950;
+  }
+
+  .btn-ghost {
+    @apply hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 px-3 py-2 rounded-lg
+           transition-all duration-150 focus:outline-none;
+  }
+
+  .btn-danger {
+    @apply bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-600/20
+           font-medium px-4 py-2 rounded-lg transition-all duration-150;
+  }
+
+  .input {
+    @apply bg-zinc-800/60 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2.5 w-full
+           placeholder:text-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1
+           focus:ring-indigo-500 transition-all duration-150 text-sm;
+  }
+
+  .label {
+    @apply text-zinc-400 text-sm font-medium mb-1.5 block;
+  }
+
+  .badge-todo {
+    @apply bg-zinc-800 text-zinc-400 border border-zinc-700;
+  }
+  .badge-in-progress {
+    @apply bg-blue-600/10 text-blue-400 border border-blue-600/20;
+  }
+  .badge-done {
+    @apply bg-emerald-600/10 text-emerald-400 border border-emerald-600/20;
+  }
+  .badge-low {
+    @apply bg-zinc-800 text-zinc-400;
+  }
+  .badge-medium {
+    @apply bg-amber-600/10 text-amber-400;
+  }
+  .badge-high {
+    @apply bg-red-600/10 text-red-400;
+  }
+}
+
+@layer utilities {
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border;
+  }
+
+  .animated-card {
+    @apply transform transition-all duration-300 ease-out;
+  }
+  .animated-card:hover {
+    @apply -translate-y-1 shadow-2xl;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.35s ease-out both;
+  }
+  .slide-up {
+    animation: slideUp 0.35s ease-out both;
+  }
+}
+
+/* Page transition */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: fadeIn 0.2s ease-out forwards;
+}
