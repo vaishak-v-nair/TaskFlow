@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     });
 
     const token = signToken({ userId: user.id, email: user.email, role: user.role });
-    setAuthCookie(token);
+    await setAuthCookie(token);
 
     return ok(user, 201);
   } catch (e) {

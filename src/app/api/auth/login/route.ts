@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (!valid) return unauthorized();
 
     const token = signToken({ userId: user.id, email: user.email, role: user.role });
-    setAuthCookie(token);
+    await setAuthCookie(token);
 
     return ok({ id: user.id, name: user.name, email: user.email, role: user.role });
   } catch (e) {
