@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .ts,.tsx",
     "migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate deploy",

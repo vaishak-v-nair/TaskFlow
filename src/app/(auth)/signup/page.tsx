@@ -44,7 +44,7 @@ export default function SignupPage() {
             <span className="text-xl font-bold text-white">TaskFlow</span>
           </div>
           <h1 className="text-2xl font-bold text-white">Create your account</h1>
-          <p className="text-zinc-500 text-sm mt-1">Start managing your team's work</p>
+          <p className="text-zinc-500 text-sm mt-1">Start managing your team&apos;s work</p>
         </div>
 
         <div className="card p-6 animated-card fade-in">

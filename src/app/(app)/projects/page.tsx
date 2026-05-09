@@ -19,14 +19,15 @@ export default function ProjectsPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => { fetchProjects(); }, []);
-
-  async function fetchProjects() {
-    const res = await fetch("/api/projects", { credentials: "include" });
-    const data = await res.json();
-    if (data.success) setProjects(data.data);
-    setLoading(false);
-  }
+  useEffect(() => {
+    async function loadProjects() {
+      const res = await fetch("/api/projects", { credentials: "include" });
+      const data = await res.json();
+      if (data.success) setProjects(data.data);
+      setLoading(false);
+    }
+    void loadProjects();
+  }, []);
 
   async function createProject() {
     if (!form.name.trim()) { setError("Name is required"); return; }

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { format, isPast } from "date-fns";
 import clsx from "clsx";
@@ -119,7 +120,7 @@ export default function ProjectPage() {
       if (meData.success) setUserId(meData.data.id);
       setLoading(false);
     });
-  }, [id]);
+  }, [id, router]);
 
   async function createTask() {
     if (!taskForm.title.trim()) { setModalError("Title is required"); return; }
@@ -230,7 +231,7 @@ export default function ProjectPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <div className="flex items-center gap-2 text-zinc-500 text-sm mb-2">
-            <a href="/projects" className="hover:text-zinc-300 transition-colors">Projects</a>
+            <Link href="/projects" className="hover:text-zinc-300 transition-colors">Projects</Link>
             <span>/</span>
             <span className="text-zinc-300">{project.name}</span>
           </div>

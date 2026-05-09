@@ -80,7 +80,7 @@ export default function DashboardPage() {
     <div className="p-6 md:p-10 space-y-8 max-w-7xl">
       <div>
         <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-zinc-500 text-sm mt-1">Your team's activity at a glance</p>
+        <p className="text-zinc-500 text-sm mt-1">Your team&apos;s activity at a glance</p>
       </div>
 
       {/* Stats */}
