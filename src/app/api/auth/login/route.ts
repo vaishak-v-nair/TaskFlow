@@ -16,10 +16,11 @@ export async function POST(req: NextRequest) {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return unauthorized();
 
-    const token = signToken({ userId: user.id, email: user.email, role: user.role });
+    const role = user.role as "ADMIN" | "MEMBER";
+    const token = signToken({ userId: user.id, email: user.email, role });
     await setAuthCookie(token);
 
-    return ok({ id: user.id, name: user.name, email: user.email, role: user.role });
+    return ok({ id: user.id, name: user.name, email: user.email, role });
   } catch (e) {
     console.error("Auth login error:", e);
     const message = e instanceof Error && e.message.includes("JWT_SECRET")
