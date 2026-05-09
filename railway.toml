@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm ci --ignore-scripts && npx prisma generate && npm run build"
+buildCommand = "npm ci --ignore-scripts --no-fund --no-audit && npx prisma generate && npm run build"
 
 [deploy]
 startCommand = "npm run migrate && npm start"
@@ -13,4 +13,4 @@ restartPolicyMaxRetries = 3
 private = true
 
 [build.env]
-NODE_VERSION = "20.19"
+NODE_VERSION = "20.19.0"
