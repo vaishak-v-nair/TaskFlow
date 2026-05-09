@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthFromRequest } from "@/lib/auth";
 import { ok, error, unauthorized, forbidden, notFound } from "@/lib/response";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 async function requireAdmin(projectId: string, userId: string) {
   const m = await prisma.projectMember.findUnique({
@@ -17,7 +17,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const admin = await requireAdmin(params.id, auth.userId);
+  const { id } = await params;
+  const admin = await requireAdmin(id, auth.userId);
   if (!admin) return forbidden();
 
   const { email, role = "MEMBER" } = await req.json();
@@ -28,12 +29,12 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!user) return notFound("User with that email");
 
   const existing = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId: params.id, userId: user.id } },
+    where: { projectId_userId: { projectId: id, userId: user.id } },
   });
   if (existing) return error("User is already a member");
 
   const member = await prisma.projectMember.create({
-    data: { projectId: params.id, userId: user.id, role },
+    data: { projectId: id, userId: user.id, role },
     include: { user: { select: { id: true, name: true, email: true } } },
   });
 
@@ -45,7 +46,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const admin = await requireAdmin(params.id, auth.userId);
+  const { id } = await params;
+  const admin = await requireAdmin(id, auth.userId);
   if (!admin) return forbidden();
 
   const { userId } = await req.json();
@@ -53,7 +55,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   if (userId === auth.userId) return error("Cannot remove yourself");
 
   await prisma.projectMember.delete({
-    where: { projectId_userId: { projectId: params.id, userId } },
+    where: { projectId_userId: { projectId: id, userId } },
   });
 
   return ok({ message: "Member removed" });
@@ -64,7 +66,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const admin = await requireAdmin(params.id, auth.userId);
+  const { id } = await params;
+  const admin = await requireAdmin(id, auth.userId);
   if (!admin) return forbidden();
 
   const { userId, role } = await req.json();
@@ -72,7 +75,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (!["ADMIN", "MEMBER"].includes(role)) return error("Invalid role");
 
   const updated = await prisma.projectMember.update({
-    where: { projectId_userId: { projectId: params.id, userId } },
+    where: { projectId_userId: { projectId: id, userId } },
     data: { role },
     include: { user: { select: { id: true, name: true, email: true } } },
   });

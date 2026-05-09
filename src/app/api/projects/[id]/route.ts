@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthFromRequest } from "@/lib/auth";
 import { ok, error, unauthorized, forbidden, notFound } from "@/lib/response";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 async function getProjectMembership(projectId: string, userId: string) {
   return prisma.projectMember.findUnique({
@@ -16,11 +16,12 @@ export async function GET(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const membership = await getProjectMembership(params.id, auth.userId);
+  const { id } = await params;
+  const membership = await getProjectMembership(id, auth.userId);
   if (!membership) return forbidden();
 
   const project = await prisma.project.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       createdBy: { select: { id: true, name: true, email: true } },
       members: {
@@ -45,7 +46,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const membership = await getProjectMembership(params.id, auth.userId);
+  const { id } = await params;
+  const membership = await getProjectMembership(id, auth.userId);
   if (!membership) return forbidden();
   if (membership.role !== "ADMIN") return forbidden();
 
@@ -53,7 +55,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
   if (!name?.trim()) return error("Project name is required");
 
   const updated = await prisma.project.update({
-    where: { id: params.id },
+    where: { id },
     data: { name: name.trim(), description: description?.trim() },
     include: {
       createdBy: { select: { id: true, name: true, email: true } },
@@ -72,10 +74,11 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const membership = await getProjectMembership(params.id, auth.userId);
+  const { id } = await params;
+  const membership = await getProjectMembership(id, auth.userId);
   if (!membership) return forbidden();
   if (membership.role !== "ADMIN") return forbidden();
 
-  await prisma.project.delete({ where: { id: params.id } });
+  await prisma.project.delete({ where: { id } });
   return ok({ message: "Project deleted" });
 }

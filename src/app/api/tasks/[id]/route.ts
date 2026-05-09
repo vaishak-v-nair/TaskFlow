@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthFromRequest } from "@/lib/auth";
 import { ok, error, unauthorized, forbidden, notFound } from "@/lib/response";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 async function getTaskWithAccess(taskId: string, userId: string) {
   const task = await prisma.task.findUnique({
@@ -21,12 +21,13 @@ export async function GET(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const { task, membership } = await getTaskWithAccess(params.id, auth.userId);
+  const { id } = await params;
+  const { task, membership } = await getTaskWithAccess(id, auth.userId);
   if (!task) return notFound("Task");
   if (!membership) return forbidden();
 
   const full = await prisma.task.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       assignee: { select: { id: true, name: true, email: true } },
       createdBy: { select: { id: true, name: true } },
@@ -42,7 +43,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const { task, membership } = await getTaskWithAccess(params.id, auth.userId);
+  const { id } = await params;
+  const { task, membership } = await getTaskWithAccess(id, auth.userId);
   if (!task) return notFound("Task");
   if (!membership) return forbidden();
 
@@ -66,7 +68,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 
   const updated = await prisma.task.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       ...(title !== undefined && { title: title.trim() }),
       ...(description !== undefined && { description: description?.trim() }),
@@ -89,7 +91,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const { task, membership } = await getTaskWithAccess(params.id, auth.userId);
+  const { id } = await params;
+  const { task, membership } = await getTaskWithAccess(id, auth.userId);
   if (!task) return notFound("Task");
   if (!membership) return forbidden();
 
@@ -97,6 +100,6 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     return forbidden();
   }
 
-  await prisma.task.delete({ where: { id: params.id } });
+  await prisma.task.delete({ where: { id } });
   return ok({ message: "Task deleted" });
 }

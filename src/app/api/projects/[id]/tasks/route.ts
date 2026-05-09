@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthFromRequest } from "@/lib/auth";
 import { ok, error, unauthorized, forbidden } from "@/lib/response";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 async function getMembership(projectId: string, userId: string) {
   return prisma.projectMember.findUnique({
@@ -16,7 +16,8 @@ export async function GET(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const membership = await getMembership(params.id, auth.userId);
+  const { id } = await params;
+  const membership = await getMembership(id, auth.userId);
   if (!membership) return forbidden();
 
   const { searchParams } = new URL(req.url);
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   const tasks = await prisma.task.findMany({
     where: {
-      projectId: params.id,
+      projectId: id,
       ...(status && { status: status as any }),
       ...(priority && { priority: priority as any }),
       ...(assigneeId && { assigneeId }),
@@ -46,7 +47,8 @@ export async function POST(req: NextRequest, { params }: Params) {
   const auth = getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
-  const membership = await getMembership(params.id, auth.userId);
+  const { id } = await params;
+  const membership = await getMembership(id, auth.userId);
   if (!membership) return forbidden();
 
   const { title, description, priority = "MEDIUM", assigneeId, dueDate } = await req.json();
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   // Validate assignee is in project
   if (assigneeId) {
-    const assigneeMembership = await getMembership(params.id, assigneeId);
+    const assigneeMembership = await getMembership(id, assigneeId);
     if (!assigneeMembership) return error("Assignee is not a project member");
   }
 
@@ -65,7 +67,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       priority,
       assigneeId: assigneeId || null,
       dueDate: dueDate ? new Date(dueDate) : null,
-      projectId: params.id,
+      projectId: id,
       createdById: auth.userId,
     },
     include: {
