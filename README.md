@@ -362,11 +362,11 @@ NODE_ENV=production
 
 #### Step 5: Configure Build & Start Commands
 The `railway.toml` file handles this automatically:
-- **Build**: `npm ci && npx prisma generate && npm run build`
-- **Start**: `npx prisma migrate deploy && npm start`
-- **Health Check**: `GET /api/health` (every 30 seconds)
+- **Build**: `npm ci --ignore-scripts --no-fund --no-audit && npx prisma generate && npm run build`
+- **Start**: `npm run migrate && exec npm run start:prod`
+- **Health Check**: `GET /login` (public page for unauthenticated Railway probes)
 
-> Note: `/api/auth/me` is authentication-protected and will fail Railway health checks for unauthenticated probes.
+> Note: authenticated API routes, including `/api/auth/me`, will fail Railway health checks for unauthenticated probes. Keep the configured health check on a public route such as `/login`.
 
 #### Step 6: Deploy
 Push a new commit to trigger deployment:
