@@ -7,10 +7,11 @@ import { ok, error, unauthorized } from "@/lib/response";
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
+    const normalizedEmail = email?.trim().toLowerCase();
 
-    if (!email || !password) return error("Email and password are required");
+    if (!normalizedEmail || !password) return error("Email and password are required");
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (!user) return unauthorized();
 
     const valid = await bcrypt.compare(password, user.password);

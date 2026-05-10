@@ -22,10 +22,11 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!admin) return forbidden();
 
   const { email, role = "MEMBER" } = await req.json();
-  if (!email) return error("Email is required");
+  const normalizedEmail = email?.trim().toLowerCase();
+  if (!normalizedEmail) return error("Email is required");
   if (!["ADMIN", "MEMBER"].includes(role)) return error("Invalid role");
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (!user) return notFound("User with that email");
 
   const existing = await prisma.projectMember.findUnique({
@@ -54,6 +55,11 @@ export async function DELETE(req: NextRequest, { params }: Params) {
   if (!userId) return error("userId is required");
   if (userId === auth.userId) return error("Cannot remove yourself");
 
+  const existing = await prisma.projectMember.findUnique({
+    where: { projectId_userId: { projectId: id, userId } },
+  });
+  if (!existing) return notFound("Project member");
+
   await prisma.projectMember.delete({
     where: { projectId_userId: { projectId: id, userId } },
   });
@@ -73,6 +79,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { userId, role } = await req.json();
   if (!userId || !role) return error("userId and role are required");
   if (!["ADMIN", "MEMBER"].includes(role)) return error("Invalid role");
+  if (userId === auth.userId && role !== "ADMIN") return error("Cannot remove your own admin access");
+
+  const existing = await prisma.projectMember.findUnique({
+    where: { projectId_userId: { projectId: id, userId } },
+  });
+  if (!existing) return notFound("Project member");
 
   const updated = await prisma.projectMember.update({
     where: { projectId_userId: { projectId: id, userId } },

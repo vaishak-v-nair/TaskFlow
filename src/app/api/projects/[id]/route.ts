@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   });
 
   if (!project) return notFound("Project");
-  return ok({ project, userRole: membership.role });
+  return ok({ project, userRole: membership.role, currentUserId: auth.userId });
 }
 
 // PUT /api/projects/[id] - update (admin only)

@@ -4,6 +4,8 @@ import { getAuthFromRequest } from "@/lib/auth";
 import { ok, error, unauthorized, forbidden } from "@/lib/response";
 
 type Params = { params: Promise<{ id: string }> };
+const VALID_PRIORITIES = ["LOW", "MEDIUM", "HIGH"] as const;
+const VALID_STATUSES = ["TODO", "IN_PROGRESS", "DONE"] as const;
 
 async function getMembership(projectId: string, userId: string) {
   return prisma.projectMember.findUnique({
@@ -51,8 +53,11 @@ export async function POST(req: NextRequest, { params }: Params) {
   const membership = await getMembership(id, auth.userId);
   if (!membership) return forbidden();
 
-  const { title, description, priority = "MEDIUM", assigneeId, dueDate } = await req.json();
+  const { title, description, priority = "MEDIUM", assigneeId, dueDate, status = "TODO" } = await req.json();
   if (!title?.trim()) return error("Task title is required");
+  if (!VALID_PRIORITIES.includes(priority)) return error("Invalid priority");
+  if (!VALID_STATUSES.includes(status)) return error("Invalid status");
+  if (dueDate && Number.isNaN(new Date(dueDate).getTime())) return error("Invalid due date");
 
   // Validate assignee is in project
   if (assigneeId) {
@@ -64,6 +69,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     data: {
       title: title.trim(),
       description: description?.trim(),
+      status,
       priority,
       assigneeId: assigneeId || null,
       dueDate: dueDate ? new Date(dueDate) : null,

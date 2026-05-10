@@ -32,12 +32,13 @@ export async function POST(req: NextRequest) {
 
   const { name, description } = await req.json();
   if (!name?.trim()) return error("Project name is required");
+  const trimmedDescription = description?.trim();
 
   const project = await prisma.$transaction(async (tx) => {
     const p = await tx.project.create({
       data: {
         name: name.trim(),
-        description: description?.trim(),
+        description: trimmedDescription || null,
         createdById: auth.userId,
       },
     });

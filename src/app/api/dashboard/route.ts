@@ -18,8 +18,10 @@ export async function GET(req: NextRequest) {
     })
   ).map((m) => m.projectId);
 
-  // Aggregate task counts
-  const [total, todo, inProgress, done, overdue] = await Promise.all([
+  const projectFilter = { projectId: { in: projectIds } };
+
+  // Aggregate task counts and load dashboard data in parallel
+  const [total, todo, inProgress, done, overdue, myTasks, recentTasks, projects] = await Promise.all([
     prisma.task.count({ where: { projectId: { in: projectIds } } }),
     prisma.task.count({ where: { projectId: { in: projectIds }, status: "TODO" } }),
     prisma.task.count({ where: { projectId: { in: projectIds }, status: "IN_PROGRESS" } }),
@@ -31,41 +33,36 @@ export async function GET(req: NextRequest) {
         dueDate: { lt: now },
       },
     }),
+    prisma.task.findMany({
+      where: {
+        ...projectFilter,
+        assigneeId: userId,
+        status: { not: "DONE" },
+      },
+      include: {
+        project: { select: { id: true, name: true } },
+      },
+      orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
+      take: 10,
+    }),
+    prisma.task.findMany({
+      where: projectFilter,
+      include: {
+        project: { select: { id: true, name: true } },
+        assignee: { select: { id: true, name: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 8,
+    }),
+    prisma.project.findMany({
+      where: { id: { in: projectIds } },
+      include: {
+        _count: { select: { tasks: true } },
+        members: { select: { role: true, userId: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
-
-  // My assigned tasks (upcoming)
-  const myTasks = await prisma.task.findMany({
-    where: {
-      assigneeId: userId,
-      status: { not: "DONE" },
-    },
-    include: {
-      project: { select: { id: true, name: true } },
-    },
-    orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
-    take: 10,
-  });
-
-  // Recent tasks across all projects
-  const recentTasks = await prisma.task.findMany({
-    where: { projectId: { in: projectIds } },
-    include: {
-      project: { select: { id: true, name: true } },
-      assignee: { select: { id: true, name: true } },
-    },
-    orderBy: { updatedAt: "desc" },
-    take: 8,
-  });
-
-  // Projects with task counts
-  const projects = await prisma.project.findMany({
-    where: { id: { in: projectIds } },
-    include: {
-      _count: { select: { tasks: true } },
-      members: { select: { role: true, userId: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
 
   return ok({
     stats: { total, todo, inProgress, done, overdue },

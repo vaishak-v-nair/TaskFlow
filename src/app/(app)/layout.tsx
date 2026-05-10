@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
+import { fetchJson } from "@/lib/api-client";
 
 interface User { id: string; name: string; email: string; role: string; }
 
@@ -30,14 +31,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    fetch("/api/auth/me", { credentials: "include" }).then((r) => r.json()).then((d) => {
-      if (d.success) setUser(d.data);
-    });
+    async function loadUser() {
+      const data = await fetchJson<User>("/api/auth/me", {
+        credentials: "include",
+        redirectOnUnauthorized: true,
+      });
+      if (data.success) setUser(data.data);
+    }
+
+    void loadUser();
   }, []);
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    router.push("/login");
+    await fetchJson("/api/auth/logout", { method: "POST", credentials: "include" });
+    router.replace("/login");
   }
 
   return (

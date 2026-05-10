@@ -54,8 +54,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
   // Members can only update status of tasks assigned to them
   // Admins can update everything
   if (membership.role === "MEMBER") {
-    const allowedKeys = Object.keys(body).filter((k) => !["title", "description", "priority", "assigneeId"].includes(k));
-    if (allowedKeys.length < Object.keys(body).length) {
+    const keys = Object.keys(body);
+    const isOwnAssignedTask = task.assigneeId === auth.userId;
+    const onlyStatusUpdate = keys.length > 0 && keys.every((key) => key === "status");
+
+    if (!isOwnAssignedTask || !onlyStatusUpdate) {
       return forbidden();
     }
   }
@@ -65,6 +68,16 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
   if (priority && !["LOW", "MEDIUM", "HIGH"].includes(priority)) {
     return error("Invalid priority");
+  }
+  if (dueDate !== undefined && dueDate && Number.isNaN(new Date(dueDate).getTime())) {
+    return error("Invalid due date");
+  }
+  if (title !== undefined && !title.trim()) {
+    return error("Task title is required");
+  }
+  if (assigneeId) {
+    const assigneeMembership = task.project.members.find((member) => member.userId === assigneeId);
+    if (!assigneeMembership) return error("Assignee is not a project member");
   }
 
   const updated = await prisma.task.update({

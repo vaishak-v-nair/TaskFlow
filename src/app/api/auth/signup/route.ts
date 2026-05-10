@@ -7,20 +7,22 @@ import { ok, error } from "@/lib/response";
 export async function POST(req: NextRequest) {
   try {
     const { name, email, password } = await req.json();
+    const normalizedName = name?.trim();
+    const normalizedEmail = email?.trim().toLowerCase();
 
-    if (!name || !email || !password) {
+    if (!normalizedName || !normalizedEmail || !password) {
       return error("Name, email, and password are required");
     }
     if (password.length < 6) {
       return error("Password must be at least 6 characters");
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) return error("Email already in use");
 
     const hashed = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
-      data: { name, email, password: hashed },
+      data: { name: normalizedName, email: normalizedEmail, password: hashed },
       select: { id: true, name: true, email: true, role: true },
     });
 

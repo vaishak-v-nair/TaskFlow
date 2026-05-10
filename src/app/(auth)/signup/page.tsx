@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { fetchJson } from "@/lib/api-client";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -15,15 +16,14 @@ export default function SignupPage() {
     if (form.password.length < 6) { setError("Password must be at least 6 characters"); return; }
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/signup", {
+      const data = await fetchJson<unknown>("/api/auth/signup", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
       if (!data.success) { setError(data.error || "Something went wrong"); return; }
-      router.push("/projects");
+      router.replace("/dashboard");
     } catch {
       setError("Something went wrong");
     } finally {

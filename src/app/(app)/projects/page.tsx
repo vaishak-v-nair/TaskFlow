@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import clsx from "clsx";
+import { fetchJson } from "@/lib/api-client";
 
 interface Project {
   id: string; name: string; description: string | null; createdAt: string;
@@ -21,8 +22,10 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     async function loadProjects() {
-      const res = await fetch("/api/projects", { credentials: "include" });
-      const data = await res.json();
+      const data = await fetchJson<Project[]>("/api/projects", {
+        credentials: "include",
+        redirectOnUnauthorized: true,
+      });
       if (data.success) setProjects(data.data);
       setLoading(false);
     }
@@ -32,13 +35,13 @@ export default function ProjectsPage() {
   async function createProject() {
     if (!form.name.trim()) { setError("Name is required"); return; }
     setCreating(true);
-    const res = await fetch("/api/projects", {
+    setError("");
+    const data = await fetchJson<Project>("/api/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(form),
     });
-    const data = await res.json();
     if (data.success) {
       setProjects([data.data, ...projects]);
       setShowModal(false);

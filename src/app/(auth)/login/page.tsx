@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { fetchJson } from "@/lib/api-client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,16 +15,21 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
-      const res = await fetch("/api/auth/login", {
+      const data = await fetchJson<unknown>("/api/auth/login", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      if (!data.success) { setError(data.error || "Something went wrong"); return; }
-      router.push("/projects");
+
+      if (!data.success) {
+        setError(data.error || "Something went wrong");
+        return;
+      }
+
+      router.replace("/dashboard");
     } catch {
       setError("Something went wrong");
     } finally {
@@ -33,7 +40,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-2 mb-3">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -70,7 +76,7 @@ export default function LoginPage() {
               <input
                 type="password"
                 className="input"
-                placeholder="••••••••"
+                placeholder="********"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
