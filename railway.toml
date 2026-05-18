@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "npm ci --ignore-scripts --no-fund --no-audit && npx prisma generate && npm run build"
 
 [deploy]
-startCommand = "npm run migrate && exec npm run start:prod"
+startCommand = "npm run migrate && exec node .next/standalone/server.js"
 healthcheckPath = "/login"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
