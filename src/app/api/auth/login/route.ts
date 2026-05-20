@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     if (!valid) return unauthorized();
 
     const role = user.role as "ADMIN" | "MEMBER";
-    const token = signToken({ userId: user.id, email: user.email, role });
+    const token = await signToken({ userId: user.id, email: user.email, role });
     await setAuthCookie(token);
 
     return ok({ id: user.id, name: user.name, email: user.email, role });

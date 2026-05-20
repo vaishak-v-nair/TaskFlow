@@ -4,7 +4,7 @@ import { getAuthFromRequest } from "@/lib/auth";
 import { ok, unauthorized } from "@/lib/response";
 
 export async function GET(req: NextRequest) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const userId = auth.userId;

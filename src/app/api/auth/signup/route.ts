@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     });
 
     const role = user.role as "ADMIN" | "MEMBER";
-    const token = signToken({ userId: user.id, email: user.email, role });
+    const token = await signToken({ userId: user.id, email: user.email, role });
     await setAuthCookie(token);
 
     return ok(user, 201);

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isPublicApiPath, isPublicPagePath } from "@/middleware/publicPaths";
 import { requireAuth } from "@/middleware/requireAuth";
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isApiRoute = pathname.startsWith("/api/");
 
@@ -16,7 +16,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const authResponse = requireAuth(req);
+  const authResponse = await requireAuth(req);
 
   // Login and signup stay public, but authenticated users should not land there.
   if (isPublicPagePath(pathname)) {

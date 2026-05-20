@@ -18,7 +18,7 @@ async function getTaskWithAccess(taskId: string, userId: string) {
 
 // GET /api/tasks/[id]
 export async function GET(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 // PUT /api/tasks/[id] - update task
 export async function PUT(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;
@@ -101,7 +101,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 // DELETE /api/tasks/[id] - admin or task creator
 export async function DELETE(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;

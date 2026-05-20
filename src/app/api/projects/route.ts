@@ -5,7 +5,7 @@ import { ok, error, unauthorized } from "@/lib/response";
 
 // GET /api/projects - list projects the user belongs to
 export async function GET(req: NextRequest) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const projects = await prisma.project.findMany({
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/projects - create a project (any authenticated user can create)
 export async function POST(req: NextRequest) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { name, description } = await req.json();

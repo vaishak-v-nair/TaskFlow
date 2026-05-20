@@ -14,7 +14,7 @@ async function requireAdmin(projectId: string, userId: string) {
 
 // POST /api/projects/[id]/members - add a member (admin only)
 export async function POST(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
 // DELETE /api/projects/[id]/members - remove a member (admin only)
 export async function DELETE(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;
@@ -69,7 +69,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
 // PATCH /api/projects/[id]/members - update member role (admin only)
 export async function PATCH(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;

@@ -15,7 +15,7 @@ async function getMembership(projectId: string, userId: string) {
 
 // GET /api/projects/[id]/tasks
 export async function GET(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 // POST /api/projects/[id]/tasks
 export async function POST(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;
