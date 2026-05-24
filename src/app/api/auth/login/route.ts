@@ -24,9 +24,10 @@ export async function POST(req: NextRequest) {
     return ok({ id: user.id, name: user.name, email: user.email, role });
   } catch (e) {
     console.error("Auth login error:", e);
-    const message = e instanceof Error && e.message.includes("JWT_SECRET")
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    const message = errorMessage.includes("JWT_SECRET")
       ? "Server configuration error. JWT_SECRET is missing."
-      : "Internal server error";
+      : "Internal server error: " + errorMessage;
     return error(message, 500);
   }
 }
