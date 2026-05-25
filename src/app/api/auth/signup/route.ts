@@ -27,15 +27,16 @@ export async function POST(req: NextRequest) {
     });
 
     const role = user.role as "ADMIN" | "MEMBER";
-    const token = signToken({ userId: user.id, email: user.email, role });
+    const token = await signToken({ userId: user.id, email: user.email, role });
     await setAuthCookie(token);
 
     return ok(user, 201);
   } catch (e) {
     console.error("Auth signup error:", e);
-    const message = e instanceof Error && e.message.includes("JWT_SECRET")
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    const message = errorMessage.includes("JWT_SECRET")
       ? "Server configuration error. JWT_SECRET is missing."
-      : "Internal server error";
+      : "Internal server error: " + errorMessage;
     return error(message, 500);
   }
 }

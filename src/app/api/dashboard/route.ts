@@ -4,7 +4,7 @@ import { getAuthFromRequest } from "@/lib/auth";
 import { ok, unauthorized } from "@/lib/response";
 
 export async function GET(req: NextRequest) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const userId = auth.userId;
@@ -21,11 +21,12 @@ export async function GET(req: NextRequest) {
   const projectFilter = { projectId: { in: projectIds } };
 
   // Aggregate task counts and load dashboard data in parallel
-  const [total, todo, inProgress, done, overdue, myTasks, recentTasks, projects] = await Promise.all([
-    prisma.task.count({ where: { projectId: { in: projectIds } } }),
-    prisma.task.count({ where: { projectId: { in: projectIds }, status: "TODO" } }),
-    prisma.task.count({ where: { projectId: { in: projectIds }, status: "IN_PROGRESS" } }),
-    prisma.task.count({ where: { projectId: { in: projectIds }, status: "DONE" } }),
+  const [statusCounts, overdueCount, myTasks, recentTasks, projects] = await Promise.all([
+    prisma.task.groupBy({
+      by: ["status"],
+      where: { projectId: { in: projectIds } },
+      _count: true,
+    }),
     prisma.task.count({
       where: {
         projectId: { in: projectIds },
@@ -64,8 +65,16 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
+  let todo = 0, inProgress = 0, done = 0;
+  statusCounts.forEach((s) => {
+    if (s.status === "TODO") todo = s._count;
+    if (s.status === "IN_PROGRESS") inProgress = s._count;
+    if (s.status === "DONE") done = s._count;
+  });
+  const total = todo + inProgress + done;
+
   return ok({
-    stats: { total, todo, inProgress, done, overdue },
+    stats: { total, todo, inProgress, done, overdue: overdueCount },
     myTasks,
     recentTasks,
     projects,

@@ -13,7 +13,7 @@ async function getProjectMembership(projectId: string, userId: string) {
 
 // GET /api/projects/[id]
 export async function GET(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 // PUT /api/projects/[id] - update (admin only)
 export async function PUT(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;
@@ -71,7 +71,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 // DELETE /api/projects/[id] - admin only
 export async function DELETE(req: NextRequest, { params }: Params) {
-  const auth = getAuthFromRequest(req);
+  const auth = await getAuthFromRequest(req);
   if (!auth) return unauthorized();
 
   const { id } = await params;

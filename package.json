@@ -16,11 +16,12 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
-    "jsonwebtoken": "^9.0.2",
+    "jose": "^6.2.3",
     "lucide-react": "^0.383.0",
     "next": "^16.2.6",
     "react": "^18",
@@ -28,7 +29,6 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
@@ -11,26 +11,32 @@ export interface JWTPayload {
   role: "ADMIN" | "MEMBER";
 }
 
-function getJwtSecret(): string {
-  if (JWT_SECRET) {
-    return JWT_SECRET;
+function getJwtSecret(): Uint8Array {
+  let secret = JWT_SECRET;
+  
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("JWT_SECRET is not configured. Add JWT_SECRET to your .env file.");
+    }
+    console.warn("JWT_SECRET is missing; using a temporary development secret.");
+    secret = "development-secret-change-me";
   }
-
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("JWT_SECRET is not configured. Add JWT_SECRET to your .env file.");
-  }
-
-  console.warn("JWT_SECRET is missing; using a temporary development secret.");
-  return "development-secret-change-me";
+  
+  return new TextEncoder().encode(secret);
 }
 
-export function signToken(payload: JWTPayload): string {
-  return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
+export async function signToken(payload: JWTPayload): Promise<string> {
+  return new SignJWT({ ...payload })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(getJwtSecret());
 }
 
-export function verifyToken(token: string): JWTPayload | null {
+export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    return jwt.verify(token, getJwtSecret()) as JWTPayload;
+    const { payload } = await jwtVerify(token, getJwtSecret());
+    return payload as unknown as JWTPayload;
   } catch {
     return null;
   }
@@ -56,15 +62,15 @@ export function getTokenFromRequest(req: NextRequest): string | null {
   return req.cookies.get(COOKIE_NAME)?.value ?? null;
 }
 
-export function getAuthFromRequest(req: NextRequest): JWTPayload | null {
+export async function getAuthFromRequest(req: NextRequest): Promise<JWTPayload | null> {
   const token = getTokenFromRequest(req);
   if (!token) return null;
-  return verifyToken(token);
+  return await verifyToken(token);
 }
 
 export async function getAuthFromCookies(): Promise<JWTPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
-  return verifyToken(token);
+  return await verifyToken(token);
 }
